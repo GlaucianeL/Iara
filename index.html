@@ -1,0 +1,189 @@
+<!DOCTYPE html> 
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iara: Guardiã do Rio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: sans-serif;
+      background-color: #5ec4d6;
+    }
+    .container{
+      height: 100vh;
+      width: 100vw;
+      max-height: 100vh;
+      overflow: none;
+    }
+    #jogo {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(94, 196, 214, 0.6), rgba(0, 105, 148, 0.8)),url('fundo.jpg') no-repeat center center;
+      image-rendering: auto;
+      background-size: cover;
+    }
+
+    #iara {
+      position: absolute;
+      width: 80px;
+      bottom: 50%;
+      right: 50px;
+      transform: translateY(50%);
+      transition: bottom 0.2s ease;
+    }
+
+    .objeto {
+      position: absolute;
+      width: 50px;
+      top: 0;
+      right: -60px;
+      transform: translateY(50%);
+    }
+
+    #placar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 24px;
+      text-shadow: 1px 1px 2px black;
+      z-index: 10;
+    }
+
+    #mensagem {
+      position: absolute;
+      top: 40%;
+      width: 100%;
+      text-align: center;
+      font-size: 36px;
+      color: yellow;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black;
+      display: none;
+    }
+
+    .peixe {
+      animation: nadar 2s infinite alternate;
+    }
+
+    @keyframes nadar {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="jogo">
+    <div id="placar">Peixes: 0</div>
+    <div id="mensagem">🌊 poluição! Fim de jogo.</div>
+    <img id="iara" src="iara.png" alt="Iara">
+  </div>
+</div>
+
+<!-- Áudios -->
+<audio id="somPeixe" src="coleta.mp3" preload="auto"></audio>
+<audio id="somLixo" src="erro.mp3" preload="auto"></audio>
+
+<script>
+  const jogo = document.getElementById("jogo");
+  const iara = document.getElementById("iara");
+  const placar = document.getElementById("placar");
+  const mensagem = document.getElementById("mensagem");
+
+  const somPeixe = document.getElementById("somPeixe");
+  const somLixo = document.getElementById("somLixo");
+
+  let pontos = 0;
+
+  function atualizarPlacar() {
+    placar.innerText = `Peixes: ${pontos}`;
+  }
+
+  function criarObjeto() {
+    const objeto = document.createElement("img");
+    objeto.classList.add("objeto");
+
+    const tipo = Math.random() < 0.7 ? "peixe" : "lixo"; // 70% peixe, 30% lixo
+    objeto.classList.add(tipo);
+
+    objeto.src = tipo === "peixe" ? "peixe1.gif" : "lixo.png";
+    objeto.style.top = Math.random() * (window.innerHeight - 60) + "px";
+
+    jogo.appendChild(objeto);
+
+    let pos = window.innerWidth;
+    const move = setInterval(() => {
+      pos -= 5;
+      objeto.style.right = pos + "px";
+
+      // Colisão ajustada para a Iara na direita
+      const iaraRect = iara.getBoundingClientRect();
+      const objetoRect = objeto.getBoundingClientRect();
+
+      if (
+        objetoRect.right > iaraRect.left &&
+        objetoRect.left < iaraRect.right &&
+        objetoRect.bottom > iaraRect.top &&
+        objetoRect.top < iaraRect.bottom
+      ) {
+        clearInterval(move);
+        objeto.remove();
+
+        if (tipo === "peixe") {
+          pontos++;
+          atualizarPlacar();
+          somPeixe.play();
+        } else {
+          somLixo.play();
+          mensagem.style.display = "block";
+          setTimeout(() => location.reload(), 3000);
+        }
+      }
+
+      if (pos < -60) {
+        clearInterval(move);
+        objeto.remove();
+      }
+    }, 30);
+
+    setTimeout(criarObjeto, 1000 + Math.random() * 2000);
+  }
+
+  function moverIara(direcao) {
+    let pos = parseInt(window.getComputedStyle(iara).bottom);
+    if (direcao === "cima" && pos < window.innerHeight - 100) {
+      iara.style.bottom = pos + 30 + "px";
+    } else if (direcao === "baixo" && pos > 30) {
+      iara.style.bottom = pos - 30 + "px";
+    }
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp") moverIara("cima");
+    if (e.key === "ArrowDown") moverIara("baixo");
+  });
+
+  document.addEventListener("touchstart", e => {
+    const y = e.touches[0].clientY;
+    if (y < window.innerHeight / 2) {
+      moverIara("cima");
+    } else {
+      moverIara("baixo");
+    }
+  });
+
+  atualizarPlacar();
+  criarObjeto();
+</script>
+</body>
+</html>
