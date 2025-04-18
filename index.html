@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>  
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -52,7 +52,7 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      color: white;
+      color: rgb(13, 10, 210);
       font-size: 24px;
       text-shadow: 1px 1px 2px black;
       z-index: 10;
@@ -70,6 +70,30 @@
       display: none;
     }
 
+    #mensagem2 {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      text-align: center;
+      font-size: 24px;
+      color: yellow;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black;
+      display: none;
+    }
+
+    #mensagemFundo {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      color: #4b05e4;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black;
+      z-index: 5;
+    }
+
     .peixe {
       animation: nadar 2s infinite alternate;
     }
@@ -85,8 +109,10 @@
 <div class="container">
   <div id="jogo">
     <div id="placar">Peixes: 0</div>
-    <div id="mensagem">🌊 poluição! Fim de jogo.</div>
+    <div id="mensagem">🚨 Um lixo passou! O rio foi poluído. Fim de jogo.</div>
+    <div id="mensagem2">🌱 Não deixe os rios poluir! 🌊</div>
     <img id="iara" src="iara.png" alt="Iara">
+    <div id="mensagemFundo">Recolha o lixo para salvar o rio!</div>
   </div>
 </div>
 
@@ -99,6 +125,8 @@
   const iara = document.getElementById("iara");
   const placar = document.getElementById("placar");
   const mensagem = document.getElementById("mensagem");
+  const mensagem2 = document.getElementById("mensagem2");
+  const mensagemFundo = document.getElementById("mensagemFundo");
 
   const somPeixe = document.getElementById("somPeixe");
   const somLixo = document.getElementById("somLixo");
@@ -106,7 +134,7 @@
   let pontos = 0;
 
   function atualizarPlacar() {
-    placar.innerText = `Peixes: ${pontos}`;
+    placar.innerText = `Lixo recolhido: ${pontos}`;
   }
 
   function criarObjeto() {
@@ -139,19 +167,24 @@
         clearInterval(move);
         objeto.remove();
 
-        if (tipo === "peixe") {
+        if (tipo === "lixo") {
           pontos++;
           atualizarPlacar();
-          somPeixe.play();
-        } else {
-          somLixo.play();
-          mensagem.style.display = "block";
-          setTimeout(() => location.reload(), 3000);
+          somPeixe.play(); // Som de coleta de lixo
         }
+        // peixe passa normalmente
       }
 
       if (pos < -60) {
         clearInterval(move);
+
+        if (tipo === "lixo") {
+          somLixo.play();
+          mensagem.style.display = "block";
+          mensagem2.style.display = "block";
+          setTimeout(() => location.reload(), 3000);
+        }
+
         objeto.remove();
       }
     }, 30);
@@ -187,3 +220,4 @@
 </script>
 </body>
 </html>
+
